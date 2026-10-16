@@ -46,6 +46,16 @@ func Count(r io.Reader) (int, int, int, error) {
 	return lines, words, bytes, nil
 }
 
+func CountFile(name string) (int, int, int, error) {
+	file, err := os.Open(name)
+	if err != nil {
+		fmt.Println(err)
+		return 0, 0, 0, err
+	}
+
+	return Count(file)
+}
+
 func main() {
 	lines := flag.Bool("l", false, "lines")
 	words := flag.Bool("w", false, "words")
@@ -57,6 +67,26 @@ func main() {
 
 	if !*lines && !*bytes && !*words {
 		*lines, *bytes, *words = true, true, true
+	}
+
+	if len(args) == 0 {
+		l, w, b, err := Count(os.Stdin)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		if *lines {
+			fmt.Println(l)
+		}
+
+		if *words {
+			fmt.Println(w)
+		}
+
+		if *bytes {
+			fmt.Println(b)
+		}
 	}
 
 	for _, name := range args {
@@ -90,5 +120,4 @@ func main() {
 
 		fmt.Println(name)
 	}
-
 }
