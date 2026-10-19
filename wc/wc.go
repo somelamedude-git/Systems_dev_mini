@@ -53,6 +53,7 @@ func CountFile(name string) (int, int, int, error) {
 		return 0, 0, 0, err
 	}
 
+	defer file.Close()
 	return Count(file)
 }
 
@@ -90,16 +91,7 @@ func main() {
 	}
 
 	for _, name := range args {
-		file, err := os.Open(name)
-
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		defer file.Close()
-
-		l, w, b, err := Count(file)
+		l, w, b, err := CountFile(name)
 
 		if err != nil {
 			fmt.Println(err)
@@ -120,4 +112,5 @@ func main() {
 
 		fmt.Println(name)
 	}
+
 }
