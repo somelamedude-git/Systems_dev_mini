@@ -2,27 +2,17 @@ package main
 
 import (
 	"crypto/sha256"
+	"flag"
 	"fmt"
 	"io"
 	"os"
 )
 
-func main() {
-	name := os.Args[1]
-	file, err := os.Open(name)
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	defer file.Close()
-
-	h := sha256.New()
+func hashFile(r io.Reader) []byte {
 	buf := make([]byte, 64*1024)
-
+	h := sha256.New()
 	for {
-		n, err := file.Read(buf)
+		n, err := r.Read(buf)
 		h.Write(buf[:n])
 
 		if err == io.EOF {
@@ -30,10 +20,27 @@ func main() {
 		}
 
 		if err != nil {
-			fmt.Println(err)
-			return
+			return []byte(err.Error())
 		}
 	}
 
-	fmt.Printf("%x  %s\n", h.Sum(nil), name)
+	return h.Sum(nil)
+}
+
+func main() {
+	flag.Parse()
+
+	args := flag.Args()
+
+	for _, name := range args {
+		file, err := os.Open(name)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		hashSum := hashFile(file)
+
+		fmt.Printf("%x  %s\n", hashSum, name)
+	}
 }
