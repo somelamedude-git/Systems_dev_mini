@@ -8,11 +8,19 @@ import (
 	"os"
 )
 
-func hashFile(r io.Reader) []byte {
+func hashFile(name string) ([]byte, error) {
+	file, err := os.Open(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
 	buf := make([]byte, 64*1024)
 	h := sha256.New()
 	for {
-		n, err := r.Read(buf)
+		n, err := file.Read(buf)
 		h.Write(buf[:n])
 
 		if err == io.EOF {
@@ -20,11 +28,11 @@ func hashFile(r io.Reader) []byte {
 		}
 
 		if err != nil {
-			return []byte(err.Error())
+			return nil, err
 		}
 	}
 
-	return h.Sum(nil)
+	return h.Sum(nil), nil
 }
 
 func main() {
@@ -33,13 +41,11 @@ func main() {
 	args := flag.Args()
 
 	for _, name := range args {
-		file, err := os.Open(name)
+		hashSum, err := hashFile(name)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-
-		hashSum := hashFile(file)
 
 		fmt.Printf("%x  %s\n", hashSum, name)
 	}
