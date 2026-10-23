@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"io/fs"
+	"path/filepath"
 )
 
 func hashFile(name string) ([]byte, error) {
@@ -40,13 +42,34 @@ func main() {
 
 	args := flag.Args()
 
-	for _, name := range args {
-		hashSum, err := hashFile(name)
-		if err != nil {
-			fmt.Println(err)
-			continue
+	root := "."
+	if len(args) > 0{
+		root = args[0]
+	}
+
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error{
+		if err != nil{
+			fmt.Fprintln(os.Stderr, err)
+			return nil
+		}
+		if !d.Type().IsRegular(){
+			return nil
 		}
 
-		fmt.Printf("%x  %s\n", hashSum, name)
+		sum, er := hashFile(path)
+		if er != nil{
+			fmt.Println(er)
+			return nil
+		}
+
+		fmt.Printf("%x  %s\n", sum, path)
+
+		return nil
+	})
+
+
+	if err != nil{
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }
