@@ -41,6 +41,8 @@ func hashFile(path string) ([]byte, error) {
 		return nil, err
 	}
 
+	defer file.Close()
+
 	buf := make([]byte, 1024*64)
 	hash := sha256.New()
 	for {
