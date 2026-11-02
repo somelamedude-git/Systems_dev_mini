@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type Node struct {
 	value int
@@ -59,6 +62,18 @@ func SearchKey(list *SkipList, key int) (keyPointer *Node, err error) {
 	}
 
 	return nil, fmt.Errorf("Key not found in the list")
+}
+
+func randomLevel(maxLevel int) int {
+	p := 0.5
+	newLevel := 1
+	for rand.Float64() < p {
+		newLevel++
+		if newLevel >= maxLevel {
+			break
+		}
+	}
+	return newLevel
 }
 
 func InsertKey(list *SkipList, key int) {
