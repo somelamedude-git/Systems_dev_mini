@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Node struct {
 	value int
 	next  []*Node
@@ -35,4 +37,33 @@ func InitSkipList(MAX_LEVEL int) *SkipList {
 		head:      head,
 	}
 	return sl
+}
+
+func SearchKey(list *SkipList, key int) (keyPointer *Node, err error) {
+	currLevel := list.currLevel
+
+	currVal := list.head.value
+	currNode := list.head
+
+	var node *Node
+
+	for {
+		if currLevel == 1 && currVal > key {
+			break
+		}
+
+		if currVal == key {
+			return node, nil
+		}
+
+		nextNode := currNode.next[currLevel-1]
+
+		if nextNode.value <= key {
+			currNode = nextNode
+		} else {
+			currLevel--
+		}
+	}
+
+	return nil, fmt.Errorf("Key not found in the list")
 }
