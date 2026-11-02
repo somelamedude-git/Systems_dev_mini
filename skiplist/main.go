@@ -22,3 +22,9 @@ func InitSkipList(MAX_LEVEL int) *Node {
 	}
 	return head
 }
+
+type SkipList struct {
+	currLevel int
+	maxLevel  int
+	head      *Node
+}
