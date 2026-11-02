@@ -24,7 +24,7 @@ type SkipList struct {
 
 func InitSkipList(MAX_LEVEL int) *SkipList {
 	head := InitNode(-1, MAX_LEVEL)
-	NilNode := InitNode(10000000000, MAX_LEVEL)
+	NilNode := InitNode(100000, MAX_LEVEL)
 	for i := 0; i < MAX_LEVEL; i++ {
 		head.next[i] = NilNode
 	}
@@ -41,28 +41,21 @@ func InitSkipList(MAX_LEVEL int) *SkipList {
 
 func SearchKey(list *SkipList, key int) (keyPointer *Node, err error) {
 	currLevel := list.currLevel
-
-	currVal := list.head.value
 	currNode := list.head
 
-	var node *Node
-
-	for {
-		if currLevel == 1 && currVal > key {
-			break
-		}
-
-		if currVal == key {
-			return node, nil
-		}
-
+	for currLevel > 0 {
 		nextNode := currNode.next[currLevel-1]
 
-		if nextNode.value <= key {
+		if nextNode.value < key {
 			currNode = nextNode
 		} else {
 			currLevel--
 		}
+	}
+
+	candidateNode := currNode.next[0]
+	if candidateNode.value == key {
+		return candidateNode, nil
 	}
 
 	return nil, fmt.Errorf("Key not found in the list")
