@@ -60,3 +60,19 @@ func SearchKey(list *SkipList, key int) (keyPointer *Node, err error) {
 
 	return nil, fmt.Errorf("Key not found in the list")
 }
+
+func InsertKey(list *SkipList, key int) {
+	currLevel := list.currLevel
+	update := make([]*Node, list.maxLevel)
+
+	currNode := list.head
+	for currLevel > 0 {
+		nextNode := currNode.next[currLevel-1]
+		if nextNode.value < key {
+			currNode = nextNode
+		} else {
+			update[currLevel-1] = currNode
+			currLevel--
+		}
+	}
+}
