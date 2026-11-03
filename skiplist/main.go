@@ -114,3 +114,38 @@ func InsertKey(list *SkipList, key int) {
 
 	list.currLevel = currLevel
 }
+
+func DeleteKey(list *SkipList, key int) {
+	currLevel := list.currLevel
+	update := make([]*Node, list.maxLevel)
+
+	currNode := list.head
+
+	for currLevel > 0 {
+		nextNode := currNode.next[currLevel-1]
+
+		if nextNode.value < key {
+			currNode = nextNode
+		} else {
+			update[currLevel-1] = currNode
+			currLevel--
+		}
+	}
+
+	candidate := currNode.next[0]
+
+	if candidate.value != key {
+		return
+	}
+
+	for i := 0; i < list.currLevel; i++ {
+		if update[i] != nil && update[i].next[i] == candidate {
+			update[i].next[i] = candidate.next[i]
+		}
+	}
+
+	for list.currLevel > 1 &&
+		list.head.next[list.currLevel-1].value == 100000 {
+		list.currLevel--
+	}
+}
