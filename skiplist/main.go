@@ -149,3 +149,45 @@ func DeleteKey(list *SkipList, key int) {
 		list.currLevel--
 	}
 }
+
+func main() {
+	sl := InitSkipList(16)
+	ref := map[int]bool{}
+
+	for i := 0; i < 100000; i++ {
+		k := rand.Intn(500)
+		switch rand.Intn(3) {
+		case 0:
+			if _, err := SearchKey(sl, k); err != nil {
+				InsertKey(sl, k)
+				ref[k] = true
+			}
+		case 1:
+			DeleteKey(sl, k)
+			delete(ref, k)
+		case 2:
+			_, err := SearchKey(sl, k)
+			found := err == nil
+			if found != ref[k] {
+				fmt.Printf("MISMATCH at op %d, key %d: skiplist=%v map=%v\n", i, k, found, ref[k])
+				return
+			}
+		}
+	}
+
+	count := 0
+	prev := -1
+	for n := sl.head.next[0]; n.value != 100000; n = n.next[0] {
+		if n.value <= prev {
+			fmt.Println("NOT SORTED at", n.value)
+			return
+		}
+		prev = n.value
+		count++
+	}
+	if count != len(ref) {
+		fmt.Printf("SIZE MISMATCH: skiplist=%d map=%d\n", count, len(ref))
+		return
+	}
+	fmt.Println("PASS: skip list matches map, size", count)
+}
