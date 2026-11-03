@@ -81,8 +81,10 @@ func InsertKey(list *SkipList, key int) {
 	update := make([]*Node, list.maxLevel)
 
 	currNode := list.head
+
 	for currLevel > 0 {
 		nextNode := currNode.next[currLevel-1]
+
 		if nextNode.value < key {
 			currNode = nextNode
 		} else {
@@ -90,4 +92,25 @@ func InsertKey(list *SkipList, key int) {
 			currLevel--
 		}
 	}
+
+	currLevel = list.currLevel
+	newLevel := randomLevel(list.maxLevel)
+
+	newNode := InitNode(key, newLevel)
+
+	for i := 0; i < min(currLevel, newLevel); i++ {
+		nextNode := update[i].next[i]
+		newNode.next[i] = nextNode
+		update[i].next[i] = newNode
+	}
+
+	for currLevel < newLevel {
+		currLevel++
+
+		nextNode := list.head.next[currLevel-1]
+		newNode.next[currLevel-1] = nextNode
+		list.head.next[currLevel-1] = newNode
+	}
+
+	list.currLevel = currLevel
 }
