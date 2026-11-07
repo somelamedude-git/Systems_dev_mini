@@ -4,10 +4,15 @@ import (
 	"sync"
 )
 
+type Message struct {
+	msg       string
+	topicName string
+}
+
 type Topic struct {
 	name   string
 	mu     sync.Mutex
-	subs   []chan string
+	subs   []chan Message
 	closed bool
 }
 
@@ -41,7 +46,7 @@ func (b *Broker) getOrCreate(name string) *Topic {
 
 type Subscriber struct {
 	id    int
-	inbox chan string
+	inbox chan Message
 }
 
 func (b *Broker) Subscribe(topicName string, subscriber *Subscriber) {
@@ -52,4 +57,21 @@ func (b *Broker) Subscribe(topicName string, subscriber *Subscriber) {
 		return
 	}
 	topic.subs = append(topic.subs, subscriber.inbox)
+}
+
+func (b *Broker) Publish(topicName string, msg string) {
+	topic := b.getOrCreate(topicName)
+	topic.mu.Lock()
+	channels := make([]chan Message, len(topic.subs))
+	copy(channels, topic.subs)
+	topic.mu.Unlock()
+
+	message := Message{
+		msg:       msg,
+		topicName: topicName,
+	}
+
+	for _, ch := range channels {
+		ch <- message
+	}
 }
