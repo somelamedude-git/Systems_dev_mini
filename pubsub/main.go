@@ -38,3 +38,18 @@ func (b *Broker) getOrCreate(name string) *Topic {
 	b.topics[name] = t
 	return t
 }
+
+type Subscriber struct {
+	id    int
+	inbox chan string
+}
+
+func (b *Broker) Subscribe(topicName string, subscriber *Subscriber) {
+	topic := b.getOrCreate(topicName)
+	topic.mu.Lock()
+	defer topic.mu.Unlock()
+	if topic.closed {
+		return
+	}
+	topic.subs = append(topic.subs, subscriber.inbox)
+}
