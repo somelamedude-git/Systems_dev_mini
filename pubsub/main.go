@@ -10,3 +10,31 @@ type Topic struct {
 	subs   []chan string
 	closed bool
 }
+
+type Broker struct {
+	mu     sync.RWMutex
+	topics map[string]*Topic
+}
+
+func NewTopic(name string) *Topic {
+	return &Topic{name: name}
+}
+
+func NewBroker() *Broker {
+	return &Broker{
+		topics: make(map[string]*Topic),
+	}
+}
+
+func (b *Broker) getOrCreate(name string) *Topic {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if t, ok := b.topics[name]; ok {
+		return t
+	}
+
+	t := NewTopic(name)
+	b.topics[name] = t
+	return t
+}
